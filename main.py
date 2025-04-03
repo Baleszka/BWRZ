@@ -19,6 +19,46 @@ USER_AGENTS = [
     "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1"
 ]
 
+def save_settings(hackerMode, usingThreading):
+    if os.path.exists("settings.txt"):
+        f = open('settings.txt', 'r+')
+        f.truncate(0) # need '0' when using r+
+        if usingThreading == True:
+            f.write('1')
+        else:
+            f.write('0')
+        if hackerMode == True:
+            f.write('1')
+        else:
+            f.write('0')
+        f.close()
+    else:
+        f = open('settings.txt', 'a')
+        if usingThreading == True:
+            f.write('1')
+        else:
+            f.write('0')
+        if hackerMode == True:
+            f.write('1')
+        else:
+            f.write('0')
+        f.close()
+
+def load_settings():
+    # Open the settings file for reading
+    with open("settings.txt", "r") as f:
+        settings = f.read()
+
+    # Split the settings into a list of characters ('1' or '0')
+    list_settings = list(settings.strip())
+
+    # Return the updated values for hackerMode and usingThreading based on settings
+    usingThreading = list_settings[0] == '1'
+    hackerMode = list_settings[1] == '1'
+
+    return hackerMode, usingThreading
+
+
 def hprint(text: str):
     if hackerMode == False:
         print(text)
@@ -182,7 +222,7 @@ def clear_terminal():
         os.system("cls")
     else:
         os.system("clear")
-
+hackerMode, usingThreading = load_settings()
 clear_terminal()
 
 print_title()
@@ -205,10 +245,12 @@ while True:
         elif option == 1 and insettings == True:
             if usingThreading == False:
                 usingThreading = True
+                save_settings(hackerMode, usingThreading)
                 clear_terminal()
                 print_settings()
             else:
                 usingThreading = False
+                save_settings(hackerMode, usingThreading)
                 clear_terminal()
                 print_settings()
         elif option == 2 and insettings == False:
@@ -246,10 +288,12 @@ while True:
         elif option == 2 and insettings == True:
             if hackerMode == False:
                 hackerMode = True
+                save_settings(hackerMode, usingThreading)
                 clear_terminal()
                 print_settings()
             elif hackerMode == True:
                 hackerMode = False
+                save_settings(hackerMode, usingThreading)
                 clear_terminal()
                 print_settings()
         elif option == 3 and insettings == False:

@@ -22,7 +22,7 @@ USER_AGENTS = [
 def save_settings(hackerMode, usingThreading):
     if os.path.exists("settings.txt"):
         f = open('settings.txt', 'r+')
-        f.truncate(0) # need '0' when using r+
+        f.truncate(0)
         if usingThreading == True:
             f.write('1')
         else:
@@ -45,19 +45,13 @@ def save_settings(hackerMode, usingThreading):
         f.close()
 
 def load_settings():
-    # Open the settings file for reading
     with open("settings.txt", "r") as f:
         settings = f.read()
-
-    # Split the settings into a list of characters ('1' or '0')
     list_settings = list(settings.strip())
-
-    # Return the updated values for hackerMode and usingThreading based on settings
     usingThreading = list_settings[0] == '1'
     hackerMode = list_settings[1] == '1'
 
     return hackerMode, usingThreading
-
 
 def hprint(text: str):
     if hackerMode == False:
@@ -222,6 +216,7 @@ def clear_terminal():
         os.system("cls")
     else:
         os.system("clear")
+        
 hackerMode, usingThreading = load_settings()
 clear_terminal()
 

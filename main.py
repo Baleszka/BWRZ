@@ -6,7 +6,8 @@ import time
 from cryptography.fernet import Fernet
 import base64
 from scapy.all import IP, TCP, send
-
+import sys
+import subprocess
 
 numlist = ['1','2','3','4','5','6','7','8','9','0']
 usingThreading = True
@@ -20,55 +21,30 @@ USER_AGENTS = [
 ]
 
 def save_settings(hackerMode, usingThreading):
-    if os.path.exists("settings.txt"):
-        f = open('settings.txt', 'r+')
-        f.truncate(0)
-        if usingThreading == True:
-            f.write('1')
-        else:
-            f.write('0')
-        if hackerMode == True:
-            f.write('1')
-        else:
-            f.write('0')
-        f.close()
-    else:
-        f = open('settings.txt', 'a')
-        if usingThreading == True:
-            f.write('1')
-        else:
-            f.write('0')
-        if hackerMode == True:
-            f.write('1')
-        else:
-            f.write('0')
-        f.close()
+    with open("settings.txt", "w") as f:
+        f.write('1' if usingThreading else '0')
+        f.write('1' if hackerMode else '0')
 
 def load_settings():
-    with open("settings.txt", "r") as f:
-        settings = f.read()
-    list_settings = list(settings.strip())
-    usingThreading = list_settings[0] == '1'
-    hackerMode = list_settings[1] == '1'
-
-    return hackerMode, usingThreading
+    try:
+        with open("settings.txt", "r") as f:
+            settings = f.read().strip()
+        return settings[1] == '1', settings[0] == '1'
+    except (FileNotFoundError, IndexError, PermissionError):
+        return False, True
 
 def hprint(text: str):
-    if hackerMode == False:
-        print(text)
-    else:
-        print(f"\033[32m{text}\033[0m")
+    print(f"\033[32m{text}\033[0m" if hackerMode else text)
 
 def hinput(text: str):
-    if hackerMode == False:
-        return input(text)
-    else:
-        return input(f"\033[32m{text}\033[0m")
+    return input(f"\033[32m{text}\033[0m" if hackerMode else text)
+
+def clear_terminal():
+    os.system("cls" if os.name == "nt" else "clear")
 
 def print_title():
-    if(os.name == "nt"):
-        clear_terminal()
-        print("""
+    clear_terminal()
+    title_art = """
 \033[32m
  ______     __     __     ______     ______    
 /\  == \   /\ \  _ \ \   /\  == \   /\___  \   
@@ -76,47 +52,14 @@ def print_title():
  \ \_____\  \ \__/".~\_\  \ \_\ \_\   /\_____\ 
   \/_____/   \/_/   \/_/   \/_/ /_/   \/_____/                                                                                                                                    
 \033[0m
-""") 
-        print_features()
-    else:
-        clear_terminal()
-        print("""
-\033[32m
- ______     __     __     ______     ______    
-/\  == \   /\ \  _ \ \   /\  == \   /\___  \   
-\ \  __<   \ \ \/ ".\ \  \ \  __<   \/_/  /__  
- \ \_____\  \ \__/".~\_\  \ \_\ \_\   /\_____\ 
-  \/_____/   \/_/   \/_/   \/_/ /_/   \/_____/                                                                                                                                    
-\033[0m
-""")
-        print_features()
+"""
+    print(title_art)
+    print_features()
+    if sys.platform == "win32":
+        print("\033[31mWARNING: RECOMMENDED TO RUN IN CMD, NOT POWERSHELL\033[0m")
 
 def print_features():
-    if os.name == "nt":
-        print("\033[31mWARNING: RECOMMENDED TO RUN IN CMD, NOT POWERSHELL AND SYN ATTACKS DONT WORK ON LINUX/MACOS\033[0m")
-
-        hprint("""
-▆▅▃▂▁𝐅𝐞𝐚𝐭𝐮𝐫𝐞𝐬▁▂▃▅▆
-╔═════════════════┃
-║
-╠═ 1. Extract MP3 from YouTube link
-║
-╠═ 2. DoS Attack on IP
-║
-╠═ 3. Encrypt a text file
-║
-╠═ 4. Decrypt the encrypted file
-║
-╠═ 5. Compress a file (HUFFMAN - NOT IMPLEMENTED YET)
-║
-╠═ 6. Decompress a file (HUFFMAN - NOT IMPLEMENTED YET)
-║
-╠═ 7. Settings
-║     
-╚═ 8. Exit
-""")
-    else:
-        hprint("""
+    hprint("""
 ▆▅▃▂▁𝐅𝐞𝐚𝐭𝐮𝐫𝐞𝐬▁▂▃▅▆
 ╔═════════════════┃
 ║
@@ -137,7 +80,6 @@ def print_features():
 ╚═ 8. Exit
 """)
 
-        
 def print_settings():
     hprint(f"""
 ▆▅▃▂▁𝐒𝐞𝐭𝐭𝐢𝐧𝐠𝐬▁▂▃▅▆
@@ -211,15 +153,18 @@ def start_attack(target_ip, target_port, time_limit, threads, attack_type):
     for thread in thread_list:
         thread.join()
 
-def clear_terminal():
-    if os.name == "nt":
-        os.system("cls")
-    else:
-        os.system("clear")
-        
+def get_helper_path(helper_name):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    if sys.platform == "win32":
+        return os.path.join(base_dir, "helpers", f"{helper_name}.exe")
+    return os.path.join(base_dir, "helpers", f"{helper_name}")
+
+def execute_helper(script_name, args):
+    script_path = os.path.join("helpers", f"{script_name}.py")
+    subprocess.run([sys.executable, script_path] + args, check=True)
+
 hackerMode, usingThreading = load_settings()
 clear_terminal()
-
 print_title()
 
 while True:
@@ -229,43 +174,25 @@ while True:
             hprint("\nBye")
             break
         
-        elif option == 1 and insettings == False:
+        elif option == 1 and not insettings:
             link = hinput("\nEnter link: ")
-            
-            if os.name == "nt":
-                os.system(f".\helpers\mp3.exe {link}")
-            else:
-                os.system(f"./helpers/mp3.out {link}")
+            helper_path = get_helper_path("mp3")
+            if not os.access(helper_path, os.X_OK):
+                raise PermissionError("Helper executable missing execute permissions")
+            subprocess.run([helper_path, link], check=True)
             break
-        elif option == 1 and insettings == True:
-            if usingThreading == False:
-                usingThreading = True
-                save_settings(hackerMode, usingThreading)
-                clear_terminal()
-                print_settings()
-            else:
-                usingThreading = False
-                save_settings(hackerMode, usingThreading)
-                clear_terminal()
-                print_settings()
-        elif option == 2 and insettings == False:
+
+        elif option == 2 and not insettings:
             target_ip = hinput("\nEnter IP address: ")
             sfp = hinput("\nDo you want to scan for open ports? (y/n): ").lower()
             if sfp == "y":
-                if usingThreading == True:
-                    if os.name == "nt":
-                        os.system(f"\npython .\\helpers\\thpscan.py {target_ip}")
-                    else:
-                        os.system(f"\npython ./helpers/thpscan.py {target_ip}")
-                else:
-                    if os.name == "nt":
-                        os.system(f"\npython .\\helpers\\pscan.py {target_ip}")
-                    else:
-                        os.system(f"\npython ./helpers/pscan.py {target_ip}")
+                script = "thpscan" if usingThreading else "pscan"
+                execute_helper(script, [target_ip])
+            
             target_port = int(hinput("\nEnter port: "))
-            if target_port < 1 or target_port > 65535:
+            if not 1 <= target_port <= 65535:
                 hprint("Invalid port!")
-                pass
+                continue
             
             time_limit = int(hinput("\nEnter attack duration (seconds): "))
             threads = int(hinput("\nEnter number of threads the attack should use: "))
@@ -280,19 +207,11 @@ while True:
             start_attack(target_ip, target_port, time_limit, threads, attack_type)
             hprint("Attack completed.")
             break
-        elif option == 2 and insettings == True:
-            if hackerMode == False:
-                hackerMode = True
-                save_settings(hackerMode, usingThreading)
-                clear_terminal()
-                print_settings()
-            elif hackerMode == True:
-                hackerMode = False
-                save_settings(hackerMode, usingThreading)
-                clear_terminal()
-                print_settings()
-        elif option == 3 and insettings == False:
+
+        elif option == 3 and not insettings:
             filename = hinput("Enter the file to encrypt: ")
+            if not os.path.exists(filename):
+                raise FileNotFoundError(f"'{filename}' not found")
             with open(filename, "r") as f:
                 text = f.read()
             print("\n\033[31mWARNING: THE KEY WILL NOT BE SAVED LOCALLY\033[0m\n")
@@ -307,11 +226,7 @@ while True:
                 enc.write(encrypt_text(text, key))
             hprint(f"\nEncrypted file created: {enc_filename}")
             break
-        elif option == 3 and insettings == True:
-            insettings = False
-            clear_terminal()
-            print_title()
-        
+
         elif option == 4:
             filename = hinput("Enter the file to decrypt: ")
             with open(filename, "r") as f:
@@ -335,6 +250,32 @@ while True:
             clear_terminal()
             insettings = True
             print_settings()
+            
+        elif option == 1 and insettings:
+            usingThreading = not usingThreading
+            save_settings(hackerMode, usingThreading)
+            clear_terminal()
+            print_settings()
+            
+        elif option == 2 and insettings:
+            hackerMode = not hackerMode
+            save_settings(hackerMode, usingThreading)
+            clear_terminal()
+            print_settings()
+            
+        elif option == 3 and insettings:
+            insettings = False
+            clear_terminal()
+            print_title()
+            
     except ValueError:
         hprint("\nInvalid input.\n")
-
+    except FileNotFoundError as e:
+        hprint(f"\nError: {e}\n")
+    except PermissionError as e:
+        hprint(f"\nPermission error: {e}\nTry 'chmod +x {get_helper_path('mp3')}' on Linux\n")
+    except subprocess.CalledProcessError:
+        hprint("\nHelper execution failed\n")
+    except KeyboardInterrupt:
+        hprint("\nOperation cancelled by user\n")
+        break

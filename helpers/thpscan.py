@@ -1,33 +1,39 @@
 import socket
 import threading
 import sys
+import os
 
 def hprint(text: str):
-    with open(".\settings.txt", "r") as f:
-        settings = f.read().strip()
-    
-    hackerMode = settings[1] == "1"
+    try:
+        with open("settings.txt", "r") as f:
+            settings = f.read().strip()
+        
+        hackerMode = settings[1] == "1"
 
-    if hackerMode:
-        print(f"\033[32m{text}\033[0m")
-    else:
+        if hackerMode:
+            print(f"\033[32m{text}\033[0m")
+        else:
+            print(text)
+    except:
         print(text)
 
 def hinput(prompt: str):
-    f = open(".\settings.txt", "r")
-    settings = f.read().strip()
-    f.close()
-    hackerMode = settings[1] == "1"
-    if hackerMode:
-        return input(f"\033[32m{prompt}\033[0m")
-    else:
+    try:
+        with open("settings.txt", "r") as f:
+            settings = f.read().strip()
+        
+        hackerMode = settings[1] == "1"
+        if hackerMode:
+            return input(f"\033[32m{prompt}\033[0m")
+        else:
+            return input(prompt)
+    except:
         return input(prompt)
-
     
 def scan_port(ip, port):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(0.01)
+        s.settimeout(0.5)
         if s.connect_ex((ip, port)) == 0:
             print(f"\033[32m[+] Port {port} is open\033[0m")
         s.close()
@@ -45,8 +51,8 @@ def pscan(ip, maximum_scan, num_threads):
 
 def main():
     if len(sys.argv) < 2:
-        hprint("Usage: python script.py <IP>")
-        hprint("Example: python script.py 192.168.1.1")
+        hprint("Usage: python " + os.path.basename(__file__) + " <IP>")
+        hprint("Example: python " + os.path.basename(__file__) + " 192.168.1.1")
         sys.exit(1)
     
     ip = sys.argv[1]

@@ -1,48 +1,36 @@
-class Node:
-    def __init__(self, char, freq):
-        self.char = char
-        self.freq = freq
-        self.left = None
-        self.right = None
+import zstandard as zstd
 
+def hprint(text: str):
+    try:
+        with open("settings.txt", "r") as f:
+            settings = f.read().strip()
+        hackerMode = settings[1] == "1"
+        print(f"\033[32m{text}\033[0m" if hackerMode else text)
+    except:
+        print(text)
 
-def calculate_frequency(text):
-    frequency = {}
-    for char in text:
-        if char in frequency:
-            frequency[char] += 1
-        else:
-            frequency[char] = 1
-    return frequency
+def hinput(prompt: str):
+    try:
+        with open("settings.txt", "r") as f:
+            settings = f.read().strip()
+        hackerMode = settings[1] == "1"
+        return input(f"\033[32m{prompt}\033[0m" if hackerMode else prompt)
+    except:
+        return input(prompt)
 
-def build_huffman_tree(frequency):
-    nodes = [Node(char, freq) for char, freq in frequency.items()]
-    while len(nodes) > 1:
-        nodes = sorted(nodes, key=lambda x: x.freq)
-        left = nodes[0]
-        right = nodes[1]
-        merged = Node(None, left.freq + right.freq)
-        merged.left = left
-        merged.right = right
-        nodes = nodes[2:] + [merged]
-    return nodes[0] if nodes else None
+hprint("\nFILE MUST BE IN THE SAME DIRECTORY AS THE MAIN SCRIPT(BWRZ/)")
 
-def build_codes(node, prefix='', codebook={}):
-    if node is not None:
-        if node.char is not None:
-            codebook[node.char] = prefix
-        build_codes(node.left, prefix + '0', codebook)
-        build_codes(node.right, prefix + '1', codebook)
-    return codebook
+file = hinput("\nEnter the name of the file to be compressed (with extension): ")
 
-def huffman_encode(text):
-    frequency = calculate_frequency(text)
-    huffman_tree = build_huffman_tree(frequency)
-    codes = build_codes(huffman_tree)
-    encoded_text = ''.join(codes[char] for char in text)
-    return encoded_text, codes
+out_name = file.rsplit('.', 1)[0] + ".zst"
 
-word = "hello world"
-encoded_text, codes = huffman_encode(word)
-print("Encoded text:", encoded_text)
-print("Huffman Codes:", codes)
+with open(file, "rb") as f:
+    data = f.read()
+
+cctx = zstd.ZstdCompressor()
+compressed = cctx.compress(data)
+
+with open(out_name, "wb") as f:
+    f.write(compressed)
+
+hprint(f"Compressed file saved as: {out_name}")

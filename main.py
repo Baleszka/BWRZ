@@ -63,7 +63,7 @@ def print_features():
 ▆▅▃▂▁𝐅𝐞𝐚𝐭𝐮𝐫𝐞𝐬▁▂▃▅▆
 ╔═════════════════┃
 ║
-╠═ 1. Extract MP3 from YouTube link
+╠═ 1. Extract MP3 from link
 ║
 ╠═ 2. DoS Attack on IP
 ║
@@ -71,9 +71,9 @@ def print_features():
 ║
 ╠═ 4. Decrypt the encrypted file
 ║
-╠═ 5. Compress a file (HUFFMAN - NOT IMPLEMENTED YET)
+╠═ 5. Compress a file using Zstandard
 ║
-╠═ 6. Decompress a file (HUFFMAN - NOT IMPLEMENTED YET)
+╠═ 6. Decompress a file using Zstandard
 ║
 ╠═ 7. Settings
 ║     
@@ -239,11 +239,22 @@ while True:
             break
         
         elif option == 5:
-            hprint("\nHUFFMAN COMPRESSION NOT IMPLEMENTED YET")
-            break
+            if os.name == "nt":
+                os.system("python ./helpers/compress.py")
+                break
+            elif os.name == "posix":
+                os.system("python3 helpers/compress.py")
+            else:
+                hprint("\nUnsupported OS for compression\n")
         
         elif option == 6:
-            hprint("\nHUFFMAN DECOMPRESSION NOT IMPLEMENTED YET")
+            if os.name == "nt":
+                os.system("python ./helpers/decompress.py")
+                break
+            elif os.name == "posix":
+                os.system("python3 helpers/decompress.py")
+            else:
+                hprint("\nUnsupported OS for decompression\n")
             break
         
         elif option == 7:

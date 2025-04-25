@@ -8,6 +8,8 @@ import base64
 from scapy.all import IP, TCP, send
 import sys
 import subprocess
+import hashlib
+
 
 numlist = ['1','2','3','4','5','6','7','8','9','0']
 usingThreading = True
@@ -67,17 +69,19 @@ def print_features():
 ║
 ╠═ 2. DoS Attack on IP
 ║
-╠═ 3. Encrypt a text file
+╠═ 3. Encrypt a text file with 32 character key
 ║
-╠═ 4. Decrypt the encrypted file
+╠═ 4. Decrypt the encrypted file with 32 character key
 ║
-╠═ 5. Compress a file using Zstandard
+╠═ 5. Encrypt a text with SHA-256 encryption
 ║
-╠═ 6. Decompress a file using Zstandard
+╠═ 6. Compress a file using Zstandard
 ║
-╠═ 7. Settings
+╠═ 7. Decompress a file using Zstandard
+║
+╠═ 8. Settings
 ║     
-╚═ 8. Exit
+╚═ 9. Exit
 """)
 
 def print_settings():
@@ -170,7 +174,7 @@ print_title()
 while True:
     try:
         option = int(hinput("Select an option: "))
-        if option == 8:
+        if option == 9:
             hprint("\nBye")
             break
         
@@ -239,6 +243,12 @@ while True:
             break
         
         elif option == 5:
+            shatext = str(hinput("\nEnter text to SHA-256 encrypt: "))
+            encoded = shatext.encode()
+            hashed = hashlib.sha256(encoded).hexdigest()
+            hprint(f"\nHashed text: {hashed}")
+            break
+        elif option == 6:
             if os.name == "nt":
                 os.system("python ./helpers/compress.py")
                 break
@@ -247,7 +257,7 @@ while True:
             else:
                 hprint("\nUnsupported OS for compression\n")
         
-        elif option == 6:
+        elif option == 7:
             if os.name == "nt":
                 os.system("python ./helpers/decompress.py")
                 break
@@ -257,7 +267,7 @@ while True:
                 hprint("\nUnsupported OS for decompression\n")
             break
         
-        elif option == 7:
+        elif option == 8:
             clear_terminal()
             insettings = True
             print_settings()
